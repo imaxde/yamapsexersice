@@ -33,15 +33,23 @@ class Mapp(QWidget):
         self.image.setPixmap(QPixmap(self.getImage(map(str, self.coordinates), self.scale)))
 
     def keyPressEvent(self, event):
-        if event.key() == Qt.Key.Key_PageUp:
-            if self.scale > 0:
-                self.scale -= 1
-        if event.key() == Qt.Key.Key_PageDown:
-            if self.scale < 21:
-                self.scale += 1
+        if event.key() == Qt.Key.Key_PageUp and self.scale > 0:
+            self.scale -= 1
+        elif event.key() == Qt.Key.Key_PageDown and self.scale < 21:
+            self.scale += 1
+        elif event.key() == Qt.Key.Key_Up and self.coordinates[1] < 85:
+            self.coordinates[1] += 10 / (2 ** (self.scale - 1))
+        elif event.key() == Qt.Key.Key_Down and self.coordinates[1] > -85:
+            self.coordinates[1] -= 10 / (2 ** (self.scale - 1))
+        elif event.key() == Qt.Key.Key_Right and self.scale < 179:
+            self.coordinates[0] += 10 / (2 ** (self.scale - 1))
+        elif event.key() == Qt.Key.Key_Left and self.scale > -179:
+            self.coordinates[0] -= 10 / (2 ** (self.scale - 1))
         self.updateMap()
 
     def updateMap(self):
+        self.coordinates[0] = round(self.coordinates[0], 6)
+        self.coordinates[1] = round(self.coordinates[1], 6)
         self.image.setPixmap(QPixmap(self.getImage(map(str, self.coordinates), self.scale)))
 
 
