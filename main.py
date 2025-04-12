@@ -33,10 +33,10 @@ class Mapp(QWidget):
         self.image.setPixmap(QPixmap(self.getImage(map(str, self.coordinates), self.scale)))
 
     def keyPressEvent(self, event):
-        if event.key() == Qt.Key.Key_1:
+        if event.key() == Qt.Key.Key_PageUp:
             if self.scale > 0:
                 self.scale -= 1
-        if event.key() == Qt.Key.Key_2:
+        if event.key() == Qt.Key.Key_PageDown:
             if self.scale < 21:
                 self.scale += 1
         self.updateMap()
