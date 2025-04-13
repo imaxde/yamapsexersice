@@ -50,9 +50,9 @@ class Mapp(QWidget):
         self.image.setPixmap(QPixmap(self.getImage()))
 
     def keyPressEvent(self, event):
-        if event.key() == Qt.Key.Key_1 and self.zoom > 0:
+        if (event.key() == Qt.Key.Key_Minus or event.key() == Qt.Key.Key_PageUp) and self.zoom > 0:
             self.zoom -= 1
-        elif event.key() == Qt.Key.Key_2 and self.zoom < 21:
+        elif (event.key() == Qt.Key.Key_Equal or event.key() == Qt.Key.Key_PageDown) and self.zoom < 21:
             self.zoom += 1
         elif event.key() == Qt.Key.Key_Up and self.coordinates[1] < 85:
             self.coordinates[1] += 10 / (2 ** (self.zoom - 1))
