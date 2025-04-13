@@ -2,7 +2,7 @@ import sys
 import requests
 from PyQt6.QtGui import QPixmap, QImage
 from PyQt6.QtCore import QByteArray, Qt
-from PyQt6.QtWidgets import QApplication, QWidget, QLabel, QPushButton
+from PyQt6.QtWidgets import QApplication, QWidget, QLabel, QPushButton, QLineEdit
 
 
 class Mapp(QWidget):
@@ -22,25 +22,37 @@ class Mapp(QWidget):
             "size": "450,450",
             "theme": "light" if self.theme else "dark",
             "format": "json"}
+        if self.field.text():
+            params["pt"] = ",".join(list(map(str, self.coordinates))) + ",flag"
         response = requests.get(server_address, params=params)
         return QImage().fromData(QByteArray(response.content))
 
     def initUI(self):
-        self.setGeometry(100, 100, 450, 450)
+        self.setGeometry(100, 100, 450, 500)
         self.setWindowTitle("Карты")
+        self.themeBtn = QPushButton(self)
+        self.themeBtn.move(10, 460)
+        self.themeBtn.resize(30, 30)
+        self.themeBtn.setText("🌑")
+        self.themeBtn.clicked.connect(self.changeTheme)
+        self.field = QLineEdit(self)
+        self.field.move(59, 460)
+        self.field.resize(180, 30)
+        self.field.setPlaceholderText("Поиск")
+        self.searchBtn = QPushButton(self)
+        self.searchBtn.move(240, 460)
+        self.searchBtn.resize(30, 30)
+        self.searchBtn.setText("🔎")
+        self.searchBtn.clicked.connect(self.geoSearch)
         self.image = QLabel(self)
         self.image.move(0, 0)
         self.image.resize(450, 450)
         self.image.setPixmap(QPixmap(self.getImage()))
-        self.themeBtn = QPushButton(self)
-        self.themeBtn.resize(50, 50)
-        self.themeBtn.setText("🌑")
-        self.themeBtn.clicked.connect(self.changeTheme)
 
     def keyPressEvent(self, event):
-        if event.key() == Qt.Key.Key_PageUp and self.zoom > 0:
+        if event.key() == Qt.Key.Key_1 and self.zoom > 0:
             self.zoom -= 1
-        elif event.key() == Qt.Key.Key_PageDown and self.zoom < 21:
+        elif event.key() == Qt.Key.Key_2 and self.zoom < 21:
             self.zoom += 1
         elif event.key() == Qt.Key.Key_Up and self.coordinates[1] < 85:
             self.coordinates[1] += 10 / (2 ** (self.zoom - 1))
@@ -61,6 +73,21 @@ class Mapp(QWidget):
         self.coordinates[0] = round(self.coordinates[0], 6)
         self.coordinates[1] = round(self.coordinates[1], 6)
         self.image.setPixmap(QPixmap(self.getImage()))
+
+    def geoSearch(self):
+        url = "https://search-maps.yandex.ru/v1/"
+        org_search_params = {
+            "apikey": "dda3ddba-c9ea-4ead-9010-f43fbc15c6e3",
+            "text": self.field.text(),
+            "lang": "ru_RU",
+            "ll": ",".join(list(map(str, self.coordinates)))
+        }
+        response = requests.get(url, params=org_search_params)
+        data = response.json()
+        self.coordinates = data["features"][0]["geometry"]["coordinates"]
+        self.zoom = 17
+        self.field.clearFocus()
+        self.updateMap()
 
 
 if __name__ == '__main__':
