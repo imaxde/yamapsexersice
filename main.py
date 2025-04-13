@@ -1,6 +1,6 @@
 import sys
 import requests
-from PyQt6.QtGui import QPixmap, QImage
+from PyQt6.QtGui import QPixmap, QImage, QFont
 from PyQt6.QtCore import QByteArray, Qt
 from PyQt6.QtWidgets import QApplication, QWidget, QLabel, QPushButton, QLineEdit
 
@@ -29,10 +29,10 @@ class Mapp(QWidget):
         return QImage().fromData(QByteArray(response.content))
 
     def initUI(self):
-        self.setGeometry(100, 100, 450, 500)
+        self.setGeometry(100, 100, 450, 550)
         self.setWindowTitle("Карты")
         self.themeBtn = QPushButton("🌑", self)
-        self.themeBtn.move(10, 460)
+        self.themeBtn.move(16, 460)
         self.themeBtn.resize(30, 30)
         self.themeBtn.setToolTip("Сменить тему")
         self.themeBtn.clicked.connect(self.changeTheme)
@@ -54,6 +54,10 @@ class Mapp(QWidget):
         self.image.move(0, 0)
         self.image.resize(450, 450)
         self.image.setPixmap(QPixmap(self.getImage()))
+        self.location = QLabel(self)
+        self.location.move(16, 500)
+        self.location.resize(400, 11)
+        self.location.setFont(QFont("Arial", 11))
 
     def keyPressEvent(self, event):
         if (event.key() == Qt.Key.Key_Minus or event.key() == Qt.Key.Key_PageUp) and self.zoom > 0:
@@ -91,6 +95,10 @@ class Mapp(QWidget):
         response = requests.get(url, params=org_search_params)
         data = response.json()
         self.focus_point = data["features"][0]["geometry"]["coordinates"]
+        if "GeocoderMetaData" in data["features"][0]["properties"]:
+            self.location.setText(data["features"][0]["properties"]["GeocoderMetaData"]["text"])
+        elif "CompanyMetaData" in data["features"][0]["properties"]:
+            self.location.setText(data["features"][0]["properties"]["CompanyMetaData"]["address"])
         self.coordinates = self.focus_point.copy()
         self.zoom = 17
         self.field.clearFocus()
@@ -100,6 +108,7 @@ class Mapp(QWidget):
         self.field.clear()
         self.field.clearFocus()
         self.focus_point = [0, 0]
+        self.location.setText("")
         self.updateMap()
 
 
