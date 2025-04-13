@@ -2,7 +2,7 @@ import sys
 import requests
 from PyQt6.QtGui import QPixmap, QImage, QFont
 from PyQt6.QtCore import QByteArray, Qt
-from PyQt6.QtWidgets import QApplication, QWidget, QLabel, QPushButton, QLineEdit
+from PyQt6.QtWidgets import QApplication, QWidget, QLabel, QPushButton, QLineEdit, QCheckBox
 
 
 class Mapp(QWidget):
@@ -50,6 +50,11 @@ class Mapp(QWidget):
         self.resetBtn.resize(30, 30)
         self.resetBtn.setToolTip("Сброс поискового результата")
         self.resetBtn.clicked.connect(self.resetSearch)
+        self.showPostCode = QPushButton("📬", self)
+        self.showPostCode.move(300, 460)
+        self.showPostCode.resize(30, 30)
+        self.showPostCode.setToolTip("Показывать индекс")
+        self.showPostCode.setCheckable(True)
         self.image = QLabel(self)
         self.image.move(0, 0)
         self.image.resize(450, 450)
@@ -101,6 +106,8 @@ class Mapp(QWidget):
             self.location.setText(data["features"][0]["properties"]["CompanyMetaData"]["address"])
         self.coordinates = self.focus_point.copy()
         self.zoom = 17
+        if self.showPostCode.isChecked():
+            self.location.setText(self.location.text() + "  " + str(self.postcode()))
         self.field.clearFocus()
         self.updateMap()
 
@@ -110,6 +117,20 @@ class Mapp(QWidget):
         self.focus_point = [0, 0]
         self.location.setText("")
         self.updateMap()
+
+    def postcode(self):
+        url = "https://geocode-maps.yandex.ru/v1"
+        org_search_params = {
+            "apikey": "8013b162-6b42-4997-9691-77b7074026e0",
+            "geocode": ",".join(list(map(str, self.focus_point))),
+            "lang": "ru_RU",
+            "results": "1",
+            "format": "json"
+        }
+        response = requests.get(url, params=org_search_params)
+        data = response.json()
+        return str(data["response"]["GeoObjectCollection"]["featureMember"][0]["GeoObject"]["metaDataProperty"][
+                       "GeocoderMetaData"]["Address"]["postal_code"])
 
 
 if __name__ == '__main__':
