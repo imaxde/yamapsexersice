@@ -31,20 +31,25 @@ class Mapp(QWidget):
     def initUI(self):
         self.setGeometry(100, 100, 450, 500)
         self.setWindowTitle("Карты")
-        self.themeBtn = QPushButton(self)
+        self.themeBtn = QPushButton("🌑", self)
         self.themeBtn.move(10, 460)
         self.themeBtn.resize(30, 30)
-        self.themeBtn.setText("🌑")
+        self.themeBtn.setToolTip("Сменить тему")
         self.themeBtn.clicked.connect(self.changeTheme)
         self.field = QLineEdit(self)
         self.field.move(59, 460)
         self.field.resize(180, 30)
         self.field.setPlaceholderText("Поиск")
-        self.searchBtn = QPushButton(self)
+        self.searchBtn = QPushButton("🔎", self)
         self.searchBtn.move(240, 460)
         self.searchBtn.resize(30, 30)
-        self.searchBtn.setText("🔎")
+        self.searchBtn.setToolTip("Искать")
         self.searchBtn.clicked.connect(self.geoSearch)
+        self.resetBtn = QPushButton("↩️", self)
+        self.resetBtn.move(270, 460)
+        self.resetBtn.resize(30, 30)
+        self.resetBtn.setToolTip("Сброс поискового результата")
+        self.resetBtn.clicked.connect(self.resetSearch)
         self.image = QLabel(self)
         self.image.move(0, 0)
         self.image.resize(450, 450)
@@ -89,6 +94,12 @@ class Mapp(QWidget):
         self.coordinates = self.focus_point.copy()
         self.zoom = 17
         self.field.clearFocus()
+        self.updateMap()
+
+    def resetSearch(self):
+        self.field.clear()
+        self.field.clearFocus()
+        self.focus_point = [0, 0]
         self.updateMap()
 
 
