@@ -55,6 +55,7 @@ class Mapp(QWidget):
         self.showPostCode.resize(30, 30)
         self.showPostCode.setToolTip("Показывать индекс")
         self.showPostCode.setCheckable(True)
+        self.showPostCode.clicked.connect(self.geoSearch)
         self.image = QLabel(self)
         self.image.move(0, 0)
         self.image.resize(450, 450)
