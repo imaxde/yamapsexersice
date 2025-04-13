@@ -9,6 +9,7 @@ class Mapp(QWidget):
     def __init__(self):
         super().__init__()
         self.coordinates = [56.107161, 57.975429]
+        self.focus_point = [0, 0]
         self.zoom = 12
         self.theme = True
         self.initUI()
@@ -22,8 +23,8 @@ class Mapp(QWidget):
             "size": "450,450",
             "theme": "light" if self.theme else "dark",
             "format": "json"}
-        if self.field.text():
-            params["pt"] = ",".join(list(map(str, self.coordinates))) + ",flag"
+        if self.focus_point[0]:
+            params["pt"] = ",".join(list(map(str, self.focus_point))) + ",flag"
         response = requests.get(server_address, params=params)
         return QImage().fromData(QByteArray(response.content))
 
@@ -84,7 +85,8 @@ class Mapp(QWidget):
         }
         response = requests.get(url, params=org_search_params)
         data = response.json()
-        self.coordinates = data["features"][0]["geometry"]["coordinates"]
+        self.focus_point = data["features"][0]["geometry"]["coordinates"]
+        self.coordinates = self.focus_point.copy()
         self.zoom = 17
         self.field.clearFocus()
         self.updateMap()
